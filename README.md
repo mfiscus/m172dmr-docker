@@ -1,16 +1,16 @@
-# MREFd Docker Image
+# M172DMR Docker Image
 
-This Ubuntu Linux based Docker image allows you to run [n7tae's](https://github.com/n7tae) [URFd](https://github.com/n7tae/mrefd) without having to configure any files or compile any code.
+This Debian Linux based Docker image allows you to run [juribeparada's](https://github.com/juribeparada) [M172DMR](https://github.com/juribeparada/MMDVM_CM/tree/master/M172DMR) without having to configure any files or compile any code.
 
-This is a currently a single-arch image and will only run on amd64 devices.
+This is a currently a single-arch image and will only run on armv7 devices.
 
 | Image Tag             | Architectures           | Base Image         | 
 | :-------------------- | :-----------------------| :----------------- | 
-| latest, ubuntu        | amd64                   | Ubuntu 22.04       | 
+| buster-slim, debian   | armv7                   | Debian Buster      | 
 
 ## Compatibility
 
-mrefd-docker requires certain variables be defined in your docker run command or docker-compose.yml (recommended) so it can automate the configuration upon bootup.
+m172dmr-docker requires certain variables be defined in your docker run command or docker-compose.yml (recommended) so it can automate the configuration upon bootup.
 ```bash
 CALLSIGN=your_callsign
 EMAIL=your@email.com
@@ -18,14 +18,14 @@ URL=your_domain.com
 XLXNUM=XLX000
 ```
 
-**For for cross-mode transcoding support you must also run a separate instance of [mrefd-docker](https://github.com/kk7mnz/tcd-docker)
+**For for cross-mode transcoding support you must also run a separate instance of [m172dmr-docker](https://github.com/kk7mnz/tcd-docker)
 
 ## Usage
 
 Command Line:
 
 ```bash
-docker run --name=mrefd -v /opt/mrefd:/config -e "CALLSIGN=M17-???" -e "EMAIL=your@email.com" -e "URL=your_domain.com" mfiscus/mrefd:latest
+docker run --name=m172dmr -v /opt/m172dmr:/config -e "CALLSIGN=M17-???" -e "EMAIL=your@email.com" -e "URL=your_domain.com" mfiscus/m172dmr:latest
 ```
 
 Using [Docker Compose](https://docs.docker.com/compose/) (recommended):
@@ -34,13 +34,13 @@ Using [Docker Compose](https://docs.docker.com/compose/) (recommended):
 version: '3.8'
 
 services:
-  mrefd:
-    image: mfiscus/mrefd:latest
-    container_name: mrefd
-    hostname: mrefd_container
+  m172dmr:
+    image: mfiscus/m172dmr:latest
+    container_name: m172dmr
+    hostname: m172dmr_container
     environment:
       # only set CALLHOME to true once your are certain your configuration is correct
-      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/mrefd/) 
+      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/m172dmr/) 
       CALLHOME: 'false' 
       CALLSIGN: 'your_callsign'
       EMAIL: 'your@email.com'
@@ -48,7 +48,7 @@ services:
       PORT: '80'
       XLXNUM: 'XLX000'
       COUNTRY: 'United States'
-      DESCRIPTION: 'My mrefd-docker reflector'
+      DESCRIPTION: 'My m172dmr-docker reflector'
       # Define how many modules you require
       MODULES: '4'
       # Name your modules however you like (container only supports naming first 4)
@@ -61,7 +61,7 @@ services:
       - proxy
     volumes:
       # local directory where state and config files (including callinghome.php) will be saved
-      - /opt/mrefd:/config
+      - /opt/m172dmr:/config
     restart: unless-stopped
 ```
 
@@ -80,17 +80,17 @@ services:
     privileged: true
     restart: unless-stopped
 
-  mrefd:
-    image: mfiscus/mrefd:latest
-    container_name: mrefd
-    hostname: mrefd_container
+  m172dmr:
+    image: mfiscus/m172dmr:latest
+    container_name: m172dmr
+    hostname: m172dmr_container
     depends_on:
       ambed:
         condition: service_healthy
         restart: true
     environment:
       # only set CALLHOME to true once your are certain your configuration is correct
-      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/mrefd/) 
+      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/m172dmr/) 
       CALLHOME: 'false' 
       CALLSIGN: 'your_callsign'
       EMAIL: 'your@email.com'
@@ -98,7 +98,7 @@ services:
       PORT: '80'
       XLXNUM: 'XLX000'
       COUNTRY: 'United States'
-      DESCRIPTION: 'My mrefd-docker reflector'
+      DESCRIPTION: 'My m172dmr-docker reflector'
       # Define how many modules you require
       MODULES: '4'
       # Name your modules however you like (container only supports naming first 4)
@@ -111,7 +111,7 @@ services:
       - proxy
     volumes:
       # local directory where state and config files (including callinghome.php) will be saved
-      - /opt/mrefd:/config
+      - /opt/m172dmr:/config
     restart: unless-stopped
 ```
 
@@ -138,39 +138,39 @@ services:
       # create entrypoints
       - --entrypoints.www.address=:80/tcp
       - --entrypoints.traefik.address=:8080/tcp
-      # mrefd
-      - --entrypoints.mrefd-http.address=:80/tcp
-      - --entrypoints.mrefd-repnet.address=:8080/udp
-      - --entrypoints.mrefd-repnet.udp.timeout=86400s
-      - --entrypoints.mrefd-urfcore.address=:10001/udp
-      - --entrypoints.mrefd-urfcore.udp.timeout=86400s
-      - --entrypoints.mrefd-interlink.address=:10002/udp
-      - --entrypoints.mrefd-interlink.udp.timeout=86400s
-      - --entrypoints.mrefd-ysf.address=:42000/udp
-      - --entrypoints.mrefd-ysf.udp.timeout=86400s
-      - --entrypoints.mrefd-dextra.address=:30001/udp
-      - --entrypoints.mrefd-dextra.udp.timeout=86400s
-      - --entrypoints.mrefd-dplus.address=:20001/udp
-      - --entrypoints.mrefd-dplus.udp.timeout=86400s
-      - --entrypoints.mrefd-dcs.address=:30051/udp
-      - --entrypoints.mrefd-dcs.udp.timeout=86400s
-      - --entrypoints.mrefd-dmr.address=:8880/udp
-      - --entrypoints.mrefd-dmr.udp.timeout=86400s
-      - --entrypoints.mrefd-mmdvm.address=:62030/udp
-      - --entrypoints.mrefd-mmdvm.udp.timeout=86400s
-      - --entrypoints.mrefd-icom-terminal-1.address=:12345/udp
-      - --entrypoints.mrefd-icom-terminal-1.udp.timeout=86400s
-      - --entrypoints.mrefd-icom-terminal-2.address=:12346/udp
-      - --entrypoints.mrefd-icom-terminal-2.udp.timeout=86400s
-      - --entrypoints.mrefd-icom-dv.address=:40000/udp
-      - --entrypoints.mrefd-icom-dv.udp.timeout=86400s
-      - --entrypoints.mrefd-yaesu-imrs.address=:21110/udp
-      - --entrypoints.mrefd-yaesu-imrs.udp.timeout=86400s
+      # m172dmr
+      - --entrypoints.m172dmr-http.address=:80/tcp
+      - --entrypoints.m172dmr-repnet.address=:8080/udp
+      - --entrypoints.m172dmr-repnet.udp.timeout=86400s
+      - --entrypoints.m172dmr-urfcore.address=:10001/udp
+      - --entrypoints.m172dmr-urfcore.udp.timeout=86400s
+      - --entrypoints.m172dmr-interlink.address=:10002/udp
+      - --entrypoints.m172dmr-interlink.udp.timeout=86400s
+      - --entrypoints.m172dmr-ysf.address=:42000/udp
+      - --entrypoints.m172dmr-ysf.udp.timeout=86400s
+      - --entrypoints.m172dmr-dextra.address=:30001/udp
+      - --entrypoints.m172dmr-dextra.udp.timeout=86400s
+      - --entrypoints.m172dmr-dplus.address=:20001/udp
+      - --entrypoints.m172dmr-dplus.udp.timeout=86400s
+      - --entrypoints.m172dmr-dcs.address=:30051/udp
+      - --entrypoints.m172dmr-dcs.udp.timeout=86400s
+      - --entrypoints.m172dmr-dmr.address=:8880/udp
+      - --entrypoints.m172dmr-dmr.udp.timeout=86400s
+      - --entrypoints.m172dmr-mmdvm.address=:62030/udp
+      - --entrypoints.m172dmr-mmdvm.udp.timeout=86400s
+      - --entrypoints.m172dmr-icom-terminal-1.address=:12345/udp
+      - --entrypoints.m172dmr-icom-terminal-1.udp.timeout=86400s
+      - --entrypoints.m172dmr-icom-terminal-2.address=:12346/udp
+      - --entrypoints.m172dmr-icom-terminal-2.udp.timeout=86400s
+      - --entrypoints.m172dmr-icom-dv.address=:40000/udp
+      - --entrypoints.m172dmr-icom-dv.udp.timeout=86400s
+      - --entrypoints.m172dmr-yaesu-imrs.address=:21110/udp
+      - --entrypoints.m172dmr-yaesu-imrs.udp.timeout=86400s
     ports:
       # traefik ports
       - 80:80/tcp # The www port
       - 8080:8080/tcp # The Web UI (enabled by --api.insecure=true)
-      # mrefd ports
+      # m172dmr ports
       - 80:80/tcp # http
       - 8080:8080/udp # repnet
       - 10001:10001/udp # urfcore
@@ -204,10 +204,10 @@ services:
     privileged: true
     restart: unless-stopped
 
-  mrefd:
-    image: mfiscus/mrefd:latest
-    container_name: mrefd
-    hostname: mrefd_container
+  m172dmr:
+    image: mfiscus/m172dmr:latest
+    container_name: m172dmr
+    hostname: m172dmr_container
     depends_on:
       traefik:
         condition: service_started
@@ -215,75 +215,75 @@ services:
         condition: service_healthy
         restart: true
     labels:
-      - "traefik.mrefd-http.rule=HostRegexp:your_domain.com,{catchall:.*}"
-      - "traefik.mrefd-http.priority=1"
+      - "traefik.m172dmr-http.rule=HostRegexp:your_domain.com,{catchall:.*}"
+      - "traefik.m172dmr-http.priority=1"
       - "traefik.docker.network=docker_proxy"
       # Explicitly tell Traefik to expose this container
       - "traefik.enable=true"
       # The domain the service will respond to
-      - "traefik.http.routers.mrefd-http.rule=Host(`your_domain.com`)"
-      # Allow request only from the predefined entry point named "mrefd-http"
-      - "traefik.http.routers.mrefd-http.entrypoints=mrefd-http"
-      # Specify port mrefd http port
-      - "traefik.http.services.mrefd-http.loadbalancer.server.port=80"
+      - "traefik.http.routers.m172dmr-http.rule=Host(`your_domain.com`)"
+      # Allow request only from the predefined entry point named "m172dmr-http"
+      - "traefik.http.routers.m172dmr-http.entrypoints=m172dmr-http"
+      # Specify port m172dmr http port
+      - "traefik.http.services.m172dmr-http.loadbalancer.server.port=80"
       # test alternate http port
-      - "traefik.http.routers.mrefd-http.service=mrefd-http"
+      - "traefik.http.routers.m172dmr-http.service=m172dmr-http"
       # UDP routers
       # repnet
-      - "traefik.udp.routers.mrefd-repnet.entrypoints=mrefd-repnet"
-      - "traefik.udp.routers.mrefd-repnet.service=mrefd-repnet"
-      - "traefik.udp.services.mrefd-repnet.loadbalancer.server.port=8080"
+      - "traefik.udp.routers.m172dmr-repnet.entrypoints=m172dmr-repnet"
+      - "traefik.udp.routers.m172dmr-repnet.service=m172dmr-repnet"
+      - "traefik.udp.services.m172dmr-repnet.loadbalancer.server.port=8080"
       # urfcore
-      - "traefik.udp.routers.mrefd-urfcore.entrypoints=mrefd-urfcore"
-      - "traefik.udp.routers.mrefd-urfcore.service=mrefd-urfcore"
-      - "traefik.udp.services.mrefd-urfcore.loadbalancer.server.port=10001"
+      - "traefik.udp.routers.m172dmr-urfcore.entrypoints=m172dmr-urfcore"
+      - "traefik.udp.routers.m172dmr-urfcore.service=m172dmr-urfcore"
+      - "traefik.udp.services.m172dmr-urfcore.loadbalancer.server.port=10001"
       # urf interlink
-      - "traefik.udp.routers.mrefd-interlink.entrypoints=mrefd-interlink"
-      - "traefik.udp.routers.mrefd-interlink.service=mrefd-interlink"
-      - "traefik.udp.services.mrefd-interlink.loadbalancer.server.port=10002"
-      # mrefd-ysf
-      - "traefik.udp.routers.mrefd-ysf.entrypoints=mrefd-ysf"
-      - "traefik.udp.routers.mrefd-ysf.service=mrefd-ysf"
-      - "traefik.udp.services.mrefd-ysf.loadbalancer.server.port=42000"
-      # mrefd-dextra
-      - "traefik.udp.routers.mrefd-dextra.entrypoints=mrefd-dextra"
-      - "traefik.udp.routers.mrefd-dextra.service=mrefd-dextra"
-      - "traefik.udp.services.mrefd-dextra.loadbalancer.server.port=30001"
-      # mrefd-dplus
-      - "traefik.udp.routers.mrefd-dplus.entrypoints=mrefd-dplus"
-      - "traefik.udp.routers.mrefd-dplus.service=mrefd-dplus"
-      - "traefik.udp.services.mrefd-dplus.loadbalancer.server.port=20001"
+      - "traefik.udp.routers.m172dmr-interlink.entrypoints=m172dmr-interlink"
+      - "traefik.udp.routers.m172dmr-interlink.service=m172dmr-interlink"
+      - "traefik.udp.services.m172dmr-interlink.loadbalancer.server.port=10002"
+      # m172dmr-ysf
+      - "traefik.udp.routers.m172dmr-ysf.entrypoints=m172dmr-ysf"
+      - "traefik.udp.routers.m172dmr-ysf.service=m172dmr-ysf"
+      - "traefik.udp.services.m172dmr-ysf.loadbalancer.server.port=42000"
+      # m172dmr-dextra
+      - "traefik.udp.routers.m172dmr-dextra.entrypoints=m172dmr-dextra"
+      - "traefik.udp.routers.m172dmr-dextra.service=m172dmr-dextra"
+      - "traefik.udp.services.m172dmr-dextra.loadbalancer.server.port=30001"
+      # m172dmr-dplus
+      - "traefik.udp.routers.m172dmr-dplus.entrypoints=m172dmr-dplus"
+      - "traefik.udp.routers.m172dmr-dplus.service=m172dmr-dplus"
+      - "traefik.udp.services.m172dmr-dplus.loadbalancer.server.port=20001"
       # dcs
-      - "traefik.udp.routers.mrefd-dcs.entrypoints=mrefd-dcs"
-      - "traefik.udp.routers.mrefd-dcs.service=mrefd-dcs"
-      - "traefik.udp.services.mrefd-dcs.loadbalancer.server.port=30051"
+      - "traefik.udp.routers.m172dmr-dcs.entrypoints=m172dmr-dcs"
+      - "traefik.udp.routers.m172dmr-dcs.service=m172dmr-dcs"
+      - "traefik.udp.services.m172dmr-dcs.loadbalancer.server.port=30051"
       # dmr
-      - "traefik.udp.routers.mrefd-dmr.entrypoints=mrefd-dmr"
-      - "traefik.udp.routers.mrefd-dmr.service=mrefd-dmr"
-      - "traefik.udp.services.mrefd-dmr.loadbalancer.server.port=8880"
+      - "traefik.udp.routers.m172dmr-dmr.entrypoints=m172dmr-dmr"
+      - "traefik.udp.routers.m172dmr-dmr.service=m172dmr-dmr"
+      - "traefik.udp.services.m172dmr-dmr.loadbalancer.server.port=8880"
       # mmdvm
-      - "traefik.udp.routers.mrefd-mmdvm.entrypoints=mrefd-mmdvm"
-      - "traefik.udp.routers.mrefd-mmdvm.service=mrefd-mmdvm"
-      - "traefik.udp.services.mrefd-mmdvm.loadbalancer.server.port=62030"
+      - "traefik.udp.routers.m172dmr-mmdvm.entrypoints=m172dmr-mmdvm"
+      - "traefik.udp.routers.m172dmr-mmdvm.service=m172dmr-mmdvm"
+      - "traefik.udp.services.m172dmr-mmdvm.loadbalancer.server.port=62030"
       # icom-terminal-1
-      - "traefik.udp.routers.mrefd-icom-terminal-1.entrypoints=mrefd-icom-terminal-1"
-      - "traefik.udp.routers.mrefd-icom-terminal-1.service=mrefd-icom-terminal-1"
-      - "traefik.udp.services.mrefd-icom-terminal-1.loadbalancer.server.port=12345"
+      - "traefik.udp.routers.m172dmr-icom-terminal-1.entrypoints=m172dmr-icom-terminal-1"
+      - "traefik.udp.routers.m172dmr-icom-terminal-1.service=m172dmr-icom-terminal-1"
+      - "traefik.udp.services.m172dmr-icom-terminal-1.loadbalancer.server.port=12345"
       # icom-terminal-2
-      - "traefik.udp.routers.mrefd-icom-terminal-2.entrypoints=mrefd-icom-terminal-2"
-      - "traefik.udp.routers.mrefd-icom-terminal-2.service=mrefd-icom-terminal-2"
-      - "traefik.udp.services.mrefd-icom-terminal-2.loadbalancer.server.port=12346"
+      - "traefik.udp.routers.m172dmr-icom-terminal-2.entrypoints=m172dmr-icom-terminal-2"
+      - "traefik.udp.routers.m172dmr-icom-terminal-2.service=m172dmr-icom-terminal-2"
+      - "traefik.udp.services.m172dmr-icom-terminal-2.loadbalancer.server.port=12346"
       # icom-dv
-      - "traefik.udp.routers.mrefd-icom-dv.entrypoints=mrefd-icom-dv"
-      - "traefik.udp.routers.mrefd-icom-dv.service=mrefd-icom-dv"
-      - "traefik.udp.services.mrefd-icom-dv.loadbalancer.server.port=40000"
+      - "traefik.udp.routers.m172dmr-icom-dv.entrypoints=m172dmr-icom-dv"
+      - "traefik.udp.routers.m172dmr-icom-dv.service=m172dmr-icom-dv"
+      - "traefik.udp.services.m172dmr-icom-dv.loadbalancer.server.port=40000"
       # yaesu-imrs
-      - "traefik.udp.routers.mrefd-yaesu-imrs.entrypoints=mrefd-yaesu-imrs"
-      - "traefik.udp.routers.mrefd-yaesu-imrs.service=mrefd-yaesu-imrs"
-      - "traefik.udp.services.mrefd-yaesu-imrs.loadbalancer.server.port=21110"
+      - "traefik.udp.routers.m172dmr-yaesu-imrs.entrypoints=m172dmr-yaesu-imrs"
+      - "traefik.udp.routers.m172dmr-yaesu-imrs.service=m172dmr-yaesu-imrs"
+      - "traefik.udp.services.m172dmr-yaesu-imrs.loadbalancer.server.port=21110"
     environment:
       # only set CALLHOME to true once your are certain your configuration is correct
-      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/mrefd/) 
+      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/m172dmr/) 
       CALLHOME: 'false' 
       CALLSIGN: 'your_callsign'
       EMAIL: 'your@email.com'
@@ -291,7 +291,7 @@ services:
       PORT: '80'
       XLXNUM: 'XLX000'
       COUNTRY: 'United States'
-      DESCRIPTION: 'My mrefd-docker reflector'
+      DESCRIPTION: 'My m172dmr-docker reflector'
       # Define how many modules you require
       MODULES: '4'
       # Name your modules however you like (container only supports naming first 4)
@@ -304,7 +304,7 @@ services:
       - proxy
     volumes:
       # local directory where state and config files (including callinghome.php) will be saved
-      - /opt/mrefd:/config
+      - /opt/m172dmr:/config
     restart: unless-stopped
 ```
 
