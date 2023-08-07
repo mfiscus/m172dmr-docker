@@ -1,0 +1,10 @@
+#!/command/with-contenv sh
+
+# download the latest dmrid.dat from the XLXAPI server to the config dir
+curl -L -s -o ${M172DMR_CONFIG_DIR}/DMRIDs.dat http://xlxapi.rlx.lu/api/exportdmr.php
+
+# download the latest XLXHosts.txt from the pistar server to the config dir
+curl -L -s -o ${M172DMR_CONFIG_DIR}/XLXHosts.txt https://www.pistar.uk/downloads/XLXHosts.txt
+
+# start daemon
+exec /usr/local/bin/M172DMR
