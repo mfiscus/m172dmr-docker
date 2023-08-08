@@ -1,30 +1,33 @@
 version: '3.8'
 
 services:
-  mrefd:
-    image: mfiscus/mrefd:latest
-    container_name: mrefd
-    hostname: mrefd_container
-    environment:
-      # only set CALLHOME to true once your are certain your configuration is correct
-      # make sure you backup your callinghome.php file (which should be located on the docker host in /opt/mrefd/) 
-      CALLHOME: 'false' 
-      CALLSIGN: 'your_callsign'
-      EMAIL: 'your@email.com'
-      URL: 'your_domain.com'
-      PORT: '80'
-      XLXNUM: 'XLX000'
-      COUNTRY: 'United States'
-      DESCRIPTION: 'My mrefd-docker reflector'
-      # Define how many modules you require
-      MODULES: '4'
-      # Name your modules however you like (container only supports naming first 4)
-      MODULEA: 'Main'
-      MODULEB: 'D-Star'
-      MODULEC: 'DMR'
-      MODULED: 'YSF'
-      TZ: 'UTC'
+  m172dmr:
+    image: mfiscus/m172dmr:latest
+    platform: linux/arm/v7
+    networks:
+      - proxy
     volumes:
-      # local directory where state and config files (including callinghome.php) will be saved
-      - /opt/mrefd:/config
-    restart: unless-stopped
+      - /opt/m172dmr:/config
+    environment:
+      TZ: 'UTC'
+      LOCATION: 'Nowhere'
+      DESCRIPTION: 'Multi-Mode Repeater'
+      URL: 'www.google.co.uk'
+      CALLSIGN: 'AD8DP D'
+      LOCALPORT: '32010'
+      DSTNAME: 'M17-USA Z'
+      DSTADDRESS: '3.138.122.152'
+      DSTPORT: '17000'
+      GAINADJUSTDB: '-3'
+      DAEMON: '0'
+      ID: '1234567'
+      XLXFILE: '/config/XLXHosts.txt'
+      XLXREFLECTOR: '950'
+      XLXMODULE: 'D'
+      STARTUPDSTID: '4001'
+      STARTUPPC: '1'
+      ADDRESS: '127.0.0.1'
+      PORT: '62030'
+      JITTER: '500'
+      PASSWORD: 'passw0rd'
+      FILE: '/config/DMRIDs.dat'

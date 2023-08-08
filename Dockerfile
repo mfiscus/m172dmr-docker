@@ -1,12 +1,14 @@
 # syntax=docker/dockerfile:1-labs
-FROM --platform=linux/arm/v7 debian:buster-slim AS base
+
+FROM --platform=linux/arm/v7 navikey/raspbian-bullseye:latest AS base
+#FROM --platform=linux/arm/v7 mfiscus/raspberrypios:bullseye AS base
 
 ENTRYPOINT ["/init"]
 
 ENV TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8" TZ="UTC"
 ENV XLXMODULE="A" M172DMR_CONFIG_DIR="/config" M172DMR_CONFIG_TMP_DIR="/config_tmp"
 ENV URL LOCATION="Nowhere" DESCRIPTION="Multi-Mode Repeater" CALLSIGN="AD8DP D" LOCALPORT="32010"
-ENV DSTNAME="M17-USA Z" DSTPORT="17000" GAINADJUSTDB="-3" DAEMON="1" ID="1234567"
+ENV DSTNAME="M17-USA Z" DSTPORT="17000" GAINADJUSTDB="-3" DAEMON="0" ID="1234567"
 ENV XLXFILE="/config/XLXHosts.txt" XLXREFLECTOR="950" XLXMODULE="A" STARTUPSTID="4001" STARTUPPC="1"
 ENV ADDRESS="127.0.0.1" PORT="62030" JITTER="500" PASSWORD="passw0rd" FILE="/config/DMRIDs.dat"
 ARG M172DMR_INST_DIR="/src/MMDVM_CM" MD380VOCODER_INST_DIR="/src/md380_vocoder"
